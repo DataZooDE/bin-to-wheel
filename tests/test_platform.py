@@ -17,6 +17,10 @@ def test_friendly_name_macos_x86_64():
     assert resolve_platform_tag("macos-x86_64") == "macosx_10_15_x86_64"
 
 
+def test_friendly_name_linux_arm64():
+    assert resolve_platform_tag("linux-arm64") == "manylinux_2_17_aarch64"
+
+
 def test_friendly_name_windows():
     assert resolve_platform_tag("windows-x64") == "win_amd64"
 
@@ -35,9 +39,9 @@ def test_unknown_tag_raises():
         resolve_platform_tag("freebsd-amd64")
 
 
-def test_platform_tags_dict_has_four_entries():
-    assert len(PLATFORM_TAGS) == 4
-    assert set(PLATFORM_TAGS.keys()) == {"linux-x86_64", "macos-arm64", "macos-x86_64", "windows-x64"}
+def test_platform_tags_dict_has_five_entries():
+    assert len(PLATFORM_TAGS) == 5
+    assert set(PLATFORM_TAGS.keys()) == {"linux-x86_64", "linux-arm64", "macos-arm64", "macos-x86_64", "windows-x64"}
 
 
 def test_detect_current_platform_returns_valid_tag():

@@ -40,6 +40,7 @@ def compute_file_hash(content: bytes) -> str:
 
 PLATFORM_TAGS: dict[str, str] = {
     "linux-x86_64": "manylinux_2_17_x86_64",
+    "linux-arm64": "manylinux_2_17_aarch64",
     "macos-arm64": "macosx_11_0_arm64",
     "macos-x86_64": "macosx_10_15_x86_64",
     "windows-x64": "win_amd64",
@@ -75,6 +76,8 @@ def detect_current_platform() -> str:
     if system == "linux":
         if machine == "x86_64":
             return "manylinux_2_17_x86_64"
+        if machine == "aarch64":
+            return "manylinux_2_17_aarch64"
         return f"linux_{machine}"
     elif system == "darwin":
         if machine == "arm64":
