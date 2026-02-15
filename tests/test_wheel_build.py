@@ -30,6 +30,18 @@ def test_filename_format(fake_binary, output_dir):
     assert path.name == "erpl_adt-2026.2.14-py3-none-manylinux_2_17_x86_64.whl"
 
 
+def test_filename_version_normalized(fake_binary, output_dir):
+    """Leading zeros in version segments are stripped per PEP 440."""
+    path = build_wheel(
+        binary_path=fake_binary,
+        output_dir=output_dir,
+        name="erpl-adt",
+        version="26.02.16",
+        platform_tag="manylinux_2_17_x86_64",
+    )
+    assert path.name == "erpl_adt-26.2.16-py3-none-manylinux_2_17_x86_64.whl"
+
+
 def test_is_valid_zip(fake_binary, output_dir):
     path = build_wheel(
         binary_path=fake_binary,

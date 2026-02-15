@@ -24,6 +24,23 @@ def normalize_package_name(name: str) -> str:
     return re.sub(r"[-.]", "_", name).lower()
 
 
+def normalize_version(version: str) -> str:
+    """Normalize a version string per PEP 440.
+
+    Strips leading zeros from each numeric segment:
+      "26.02.16" → "26.2.16"
+      "1.0.0" → "1.0.0" (unchanged)
+    """
+    parts = version.split(".")
+    normalized = []
+    for part in parts:
+        if part.isdigit():
+            normalized.append(str(int(part)))
+        else:
+            normalized.append(part)
+    return ".".join(normalized)
+
+
 # ---------------------------------------------------------------------------
 # Epic 2: RECORD hash computation
 # ---------------------------------------------------------------------------
@@ -263,6 +280,7 @@ def build_wheel(
     binary_path: single Path or list of Paths
     entry_point: single name, or list of names (paired with binary_path list)
     """
+    version = normalize_version(version)
     output_dir = Path(output_dir)
 
     # Normalize to lists
