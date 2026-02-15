@@ -361,6 +361,7 @@ def build_wheel(
     with zipfile.ZipFile(wheel_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for filepath, content in sorted(wheel_files.items()):
             info = zipfile.ZipInfo(filepath)
+            info.compress_type = zipfile.ZIP_DEFLATED
             if filepath in bin_paths_in_zip:
                 info.external_attr = (0o100755 << 16)
             else:

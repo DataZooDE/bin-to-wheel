@@ -132,6 +132,22 @@ def test_binary_permissions(fake_binary, output_dir):
         assert unix_perms & 0o755 == 0o755
 
 
+def test_files_are_compressed(fake_binary, output_dir):
+    """All files in the wheel use DEFLATED compression, not STORED."""
+    path = build_wheel(
+        binary_path=fake_binary,
+        output_dir=output_dir,
+        name="erpl-adt",
+        version="1.0.0",
+        platform_tag="manylinux_2_17_x86_64",
+    )
+    with zipfile.ZipFile(path) as zf:
+        for info in zf.infolist():
+            assert info.compress_type == zipfile.ZIP_DEFLATED, (
+                f"{info.filename} uses compress_type={info.compress_type}, expected DEFLATED(8)"
+            )
+
+
 def test_record_hashes_match(fake_binary, output_dir):
     path = build_wheel(
         binary_path=fake_binary,
