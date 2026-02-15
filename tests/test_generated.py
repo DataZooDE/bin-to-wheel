@@ -30,12 +30,29 @@ def test_init_py_has_main_function():
 
 def test_init_py_has_get_binary_path():
     src = generate_init_py("1.0.0", "erpl-adt")
-    assert "def get_binary_path()" in src
+    assert "def get_binary_path(" in src
 
 
 def test_init_py_handles_chmod():
     src = generate_init_py("1.0.0", "erpl-adt")
     assert "chmod" in src or "stat" in src
+
+
+def test_init_py_single_binary_as_string():
+    """Single binary name (string) still works."""
+    src = generate_init_py("1.0.0", "my-tool")
+    assert "BINARY_NAMES = ['my-tool']" in src
+    assert "def main_my_tool():" in src
+    assert "def main():" in src
+
+
+def test_init_py_multi_binary():
+    """Multiple binary names produce per-binary main functions."""
+    src = generate_init_py("1.0.0", ["flapi", "flapii"])
+    assert "BINARY_NAMES = ['flapi', 'flapii']" in src
+    assert "def main_flapi():" in src
+    assert "def main_flapii():" in src
+    assert "def main():" in src  # default still present
 
 
 # --- __main__.py ---
@@ -127,6 +144,16 @@ def test_entry_points_format():
 def test_entry_points_custom_name():
     e = generate_entry_points("my-cli", "my_cli")
     assert "my-cli = my_cli:main" in e
+
+
+def test_entry_points_multi():
+    e = generate_entry_points(
+        [("flapi", "main_flapi"), ("flapii", "main_flapii")],
+        "flapi_io",
+    )
+    assert "[console_scripts]" in e
+    assert "flapi = flapi_io:main_flapi" in e
+    assert "flapii = flapi_io:main_flapii" in e
 
 
 # --- RECORD ---

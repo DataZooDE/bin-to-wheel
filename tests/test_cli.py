@@ -99,3 +99,50 @@ def test_binary_not_found(output_dir):
         "--output-dir", str(output_dir),
     )
     assert r.returncode != 0
+
+
+def test_multi_binary_builds_wheel(tmp_path, output_dir):
+    """Two --binary flags produce a wheel with both binaries."""
+    bin1 = tmp_path / "flapi"
+    bin1.write_bytes(b"#!/bin/sh\necho flapi\n")
+    bin2 = tmp_path / "flapii"
+    bin2.write_bytes(b"#!/bin/sh\necho flapii\n")
+
+    r = run_cli(
+        "--name", "flapi-io",
+        "--version", "1.0.0",
+        "--binary", str(bin1), "--entry-point", "flapi",
+        "--binary", str(bin2), "--entry-point", "flapii",
+        "--platform", "linux-x86_64",
+        "--output-dir", str(output_dir),
+    )
+    assert r.returncode == 0, f"stderr: {r.stderr}"
+
+    whl = list(output_dir.glob("*.whl"))[0]
+    with zipfile.ZipFile(whl) as zf:
+        names = zf.namelist()
+        assert "flapi_io/bin/flapi" in names
+        assert "flapi_io/bin/flapii" in names
+        ep = zf.read("flapi_io-1.0.0.dist-info/entry_points.txt").decode()
+        assert "flapi = flapi_io:main_flapi" in ep
+        assert "flapii = flapi_io:main_flapii" in ep
+
+
+def test_multi_binary_mismatched_entry_points(tmp_path, output_dir):
+    """Mismatched --binary and --entry-point counts should fail."""
+    bin1 = tmp_path / "a"
+    bin1.write_bytes(b"x")
+    bin2 = tmp_path / "b"
+    bin2.write_bytes(b"y")
+
+    r = run_cli(
+        "--name", "test-pkg",
+        "--version", "1.0.0",
+        "--binary", str(bin1),
+        "--binary", str(bin2),
+        "--entry-point", "only-one",
+        "--platform", "linux-x86_64",
+        "--output-dir", str(output_dir),
+    )
+    assert r.returncode != 0
+    assert "count" in r.stderr.lower() or "match" in r.stderr.lower()
